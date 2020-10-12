@@ -27,23 +27,23 @@ public class Dump {
     public static final int SECTOR_INDEX = 8;
 
     public static final byte[] KEY_B =
-            {(byte)0xE3,(byte)0x51,(byte)0x73,(byte)0x49, (byte)0x4A,(byte)0x81};
+            {(byte) 0xE3, (byte) 0x51, (byte) 0x73, (byte) 0x49, (byte) 0x4A, (byte) 0x81};
 
     public static final byte[] KEY_A =
-            {(byte)0xA7,(byte)0x3F,(byte)0x5D,(byte)0xC1, (byte)0xD3,(byte)0x33};
+            {(byte) 0xA7, (byte) 0x3F, (byte) 0x5D, (byte) 0xC1, (byte) 0xD3, (byte) 0x33};
 
     public static final byte[] KEY_0 =
-            {(byte)0x00,(byte)0x00,(byte)0x00,(byte)0x00, (byte)0x00,(byte)0x00};
+            {(byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00};
 
     // raw
-    protected byte[]    uid;
-    protected byte[][]  data;
+    protected byte[] uid;
+    protected byte[][] data;
 
     // parsed
-    protected int    cardNumber;
-    protected int    balance;
-    protected Date   lastUsageDate;
-    protected int    lastValidatorId;
+    protected int cardNumber;
+    protected int balance;
+    protected Date lastUsageDate;
+    protected int lastValidatorId;
 
     public Dump(byte[] uid, byte[][] sector8) {
         this.uid = uid;
@@ -92,7 +92,7 @@ public class Dump {
 
         // good card
         if (mfc.authenticateSectorWithKeyA(SECTOR_INDEX, KEY_A) && mfc.authenticateSectorWithKeyB(SECTOR_INDEX, KEY_B)
-                ) {
+        ) {
             return mfc;
         }
 
@@ -103,33 +103,21 @@ public class Dump {
         // block#0 bytes#3-6
         cardNumber = intval(data[0][3], data[0][4], data[0][5], data[0][6]) >> 4;
 
-        // block#1 bytes#0-1
+        // incorrect
+        //TODO: find correct field for validator ID
         lastValidatorId = intval(data[1][0], data[1][1]);
 
-        // block#1 bytes#2-4½
-        int lastUsageDay = intval(data[1][2], data[1][3]);
-        if (lastUsageDay > 0) {
-            double lastUsageTime = (double) intval(
-                    (byte) (data[1][4] >> 4 & 0x0F),
-                    (byte) (data[1][5] >> 4 & 0x0F | data[1][4] << 4 & 0xF0)
-            );
-            lastUsageTime = lastUsageTime / 120.0;
-            int lastUsageHour = (int)Math.floor(lastUsageTime);
-            int lastUsageMinute = (int)Math.round((lastUsageTime % 1) * 60);
-
+        int minutesDelta = intval((byte) (data[1][0]), (byte) (data[1][1]), (byte) (data[1][2])) >> 1;
+        if (minutesDelta > 0) {
             Calendar c = Calendar.getInstance(TimeZone.getTimeZone("GMT+3"));
-            c.set(1992, 0, 1, lastUsageHour, lastUsageMinute);
-            c.add(Calendar.DATE, lastUsageDay - 1);
+            c.set(2018, 11, 31, 0, 0);
+            c.add(Calendar.MINUTE, minutesDelta);
             lastUsageDate = c.getTime();
         } else {
             lastUsageDate = null;
         }
 
-        // block#1 bytes#8.5-10.5 (??)
-        balance = intval(
-                (byte)(data[1][5]),
-                (byte) data[1][6]
-        ) / 25;
+        balance = intval((byte) (data[1][5]), (byte) data[1][6]) / 25;
     }
 
     public void write(Tag tag) throws IOException {
@@ -241,8 +229,8 @@ public class Dump {
 
     public static String formatCardNumber(int cardNumber) {
         int cardNum3 = cardNumber % 1000;
-        int cardNum2 = (int)Math.floor(cardNumber / 1000) % 1000;
-        int cardNum1 = (int)Math.floor(cardNumber / 1000000) % 1000;
+        int cardNum2 = (int) Math.floor(cardNumber / 1000) % 1000;
+        int cardNum1 = (int) Math.floor(cardNumber / 1000000) % 1000;
         return String.format("%04d %03d %03d", cardNum1, cardNum2, cardNum3);
     }
 
@@ -253,7 +241,7 @@ public class Dump {
     protected static int intval(byte... bytes) {
         int value = 0;
         for (int i = 0; i < bytes.length; i++) {
-            int x = (int)bytes[bytes.length - i - 1];
+            int x = (int) bytes[bytes.length - i - 1];
             while (x < 0) x = 256 + x;
             value += x * Math.pow(0x100, i);
         }
