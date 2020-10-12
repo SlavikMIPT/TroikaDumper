@@ -1,4 +1,4 @@
-TroikaDumper
+TroikaDumper(корректный баланс и дата использования)
 =======
 <img src="https://habrastorage.org/getpro/habr/post_images/eb6/453/bad/eb6453bad2e1549fcdc53e73f34bc6ef.png" align="left" width="120" alt="TroikaDumper logo" />
 Приложение TroikaDumper позволяет читать, сохранять и восстанавливать записанное состояние памяти карты Тройка.
@@ -10,7 +10,7 @@ NFC чип должен быть произодства NXP [wikipedia.org/wiki/
 
 ### Инструкция
 
-1. Установите приложение скачав его по ссылке [TroikaDumper.apk](https://github.com/SlavikMIPT/TroikaDumper/releases/download/0.2/TroikaDumper.apk)
+1. Установите приложение скачав его по ссылке [TroikaDumper.apk](https://github.com/SlavikMIPT/TroikaDumper/releases/download/latest/TroikaDumper.apk)
 
 2. Запустите приложение и поднести карту Тройка.   
 Должно отобразится состояние баланса, время последнего прохода и т. д.  
